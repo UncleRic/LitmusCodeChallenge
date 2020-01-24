@@ -23,9 +23,9 @@ struct ErrorStruct: Codable {
 struct GoogleState {
     let APIKey = "AIzaSyAvisnGVcTlXChaYWzvZAK4eGR4aee_ie4"
     private let url: URL = URL(string: "apple.com")!
-    
+
     var dataDict: GoogleBooksModel?
-    
+
     enum Message {
         case dataReceived(Data?)
         case reload(String)
@@ -48,16 +48,16 @@ struct GoogleState {
 
     mutating func process(_ message: Message) -> Command? {
         switch message {
-        case .dataReceived(let data):
+        case let .dataReceived(data):
             guard let data = data
             else { return nil }
             do {
                 dataDict = try JSONDecoder().decode(GoogleBooksModel.self, from: data)
-            } catch (let error) {
+            } catch {
                 print(error)
             }
 
-        case .reload(let searchText):
+        case let .reload(searchText):
             if let url = buildURL(searchText.urlVersion) {
                 return .loadData(url: url, message: Message.dataReceived)
             }

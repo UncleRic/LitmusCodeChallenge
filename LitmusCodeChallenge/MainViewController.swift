@@ -12,19 +12,19 @@ class MainViewController: UIViewController {
     @IBOutlet var titleLabel: UILabel!
     @IBOutlet var searchBar: UISearchBar!
     @IBOutlet var collectionView: UICollectionView!
-    
+
     var books: [Item]?
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
     }
-    
+
     var state = GoogleState() {
         didSet {
             guard let books = state.dataDict?.items else {
                 return
             }
-            
+
             if books.count > 0 {
                 self.books = books
                 collectionView.isHidden = false
@@ -33,7 +33,7 @@ class MainViewController: UIViewController {
             }
         }
     }
-    
+
     func send(_ message: GoogleState.Message) {
         // Process the CurrencyState Command:
         if let command = state.process(message) {
@@ -53,7 +53,7 @@ class MainViewController: UIViewController {
                         }
                     }
                 }.resume()
-                
+
             case let .errorStatus(desc):
                 let title = "Error"
                 let msg = desc.error.info
@@ -64,7 +64,7 @@ class MainViewController: UIViewController {
             }
         }
     }
-    
+
     private func downloadImageAtURL(_ url: URL, completion: @escaping (_ image: UIImage?, _ error: NSError?) -> Void) {
         URLSession.shared.dataTask(with: url, completionHandler: { data, _, error in
             DispatchQueue.main.async { [weak self] in
@@ -82,16 +82,16 @@ class MainViewController: UIViewController {
         })
             .resume()
     }
-    
+
     // ----------------------------------------------------------------------------------
-    
+
     // MARK: - Action Methods
-    
-    @IBAction func tapGesture(_ sender: UITapGestureRecognizer) {
-         searchBar.resignFirstResponder()
+
+    @IBAction func tapGesture(_: UITapGestureRecognizer) {
+        searchBar.resignFirstResponder()
     }
-    
-    @IBAction func exitAction(_ sender: UIBarButtonItem) {
+
+    @IBAction func exitAction(_: UIBarButtonItem) {
         exit(0)
     }
 }
@@ -99,30 +99,30 @@ class MainViewController: UIViewController {
 // ============================================================================================
 
 extension MainViewController: UICollectionViewDataSource {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    func collectionView(_: UICollectionView, numberOfItemsInSection _: Int) -> Int {
         return books?.count ?? 0
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell: UICollectionViewCell = collectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath)
-    
+
         if let book = books?[indexPath.item] {
             let imageLink = book.volumeInfo.imageLinks.smallThumbnail
             let title = book.volumeInfo.title
             let authors = book.volumeInfo.authors
-            
+
             let url = URL(string: imageLink)
             downloadImageAtURL(url!, completion: { (image: UIImage?, error: NSError?) in
                 if let myImage = image {
                     let imageView = cell.contentView.viewWithTag(1)! as! UIImageView
                     imageView.image = myImage
-                    
+
                     let titleLabel = cell.contentView.viewWithTag(2)! as! UILabel
                     let authorLabel = cell.contentView.viewWithTag(3)! as! UILabel
-                    
+
                     titleLabel.text = title
                     authorLabel.text = authors[0]
-                    
+
                     imageView.anchor(top: cell.contentView.safeAreaLayoutGuide.topAnchor,
                                      bottom: nil,
                                      left: cell.contentView.safeAreaLayoutGuide.leftAnchor,
@@ -135,21 +135,8 @@ extension MainViewController: UICollectionViewDataSource {
                                      paddingRight: 0,
                                      width: 0,
                                      height: 62)
-                    
+
                     titleLabel.anchor(top: nil,
-                                     bottom: cell.contentView.safeAreaLayoutGuide.bottomAnchor,
-                                     left: cell.contentView.safeAreaLayoutGuide.leftAnchor,
-                                     right: cell.contentView.safeAreaLayoutGuide.rightAnchor,
-                                     centerYAnchor: nil,
-                                     centerXAnchor: nil,
-                                     paddingTop: 0,
-                                     paddingLeft: 0,
-                                     paddingBottom: -16.0,
-                                     paddingRight: 0,
-                                     width: 0,
-                                     height: 16)
-                    
-                    authorLabel.anchor(top: nil,
                                       bottom: cell.contentView.safeAreaLayoutGuide.bottomAnchor,
                                       left: cell.contentView.safeAreaLayoutGuide.leftAnchor,
                                       right: cell.contentView.safeAreaLayoutGuide.rightAnchor,
@@ -157,13 +144,24 @@ extension MainViewController: UICollectionViewDataSource {
                                       centerXAnchor: nil,
                                       paddingTop: 0,
                                       paddingLeft: 0,
-                                      paddingBottom: 0.0,
+                                      paddingBottom: -16.0,
                                       paddingRight: 0,
                                       width: 0,
-                                      height: 18)
-                    
-                    
-                    
+                                      height: 16)
+
+                    authorLabel.anchor(top: nil,
+                                       bottom: cell.contentView.safeAreaLayoutGuide.bottomAnchor,
+                                       left: cell.contentView.safeAreaLayoutGuide.leftAnchor,
+                                       right: cell.contentView.safeAreaLayoutGuide.rightAnchor,
+                                       centerYAnchor: nil,
+                                       centerXAnchor: nil,
+                                       paddingTop: 0,
+                                       paddingLeft: 0,
+                                       paddingBottom: 0.0,
+                                       paddingRight: 0,
+                                       width: 0,
+                                       height: 18)
+
                 } else if let myError = error {
                     print("*** ERROR in cell: \(myError.userInfo)")
                 }
@@ -185,8 +183,8 @@ extension MainViewController: UISearchBarDelegate {
             send(.reload(searchBar.text!))
         }
     }
-    
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+
+    func searchBar(_: UISearchBar, textDidChange searchText: String) {
         if searchText.count < 1 {
             books = nil
             state.dataDict = nil
